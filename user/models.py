@@ -42,3 +42,8 @@ class Roles(BaseModel):
     role = models.ForeignKey(Dropdown,on_delete=models.SET_NULL,null=True,related_name='roles')
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user_roles')
     
+    
+class LeftPanelRoute(models.Model):
+    name = models.CharField(max_length=255)
+    path = models.CharField(max_length=255)
+    role = models.ForeignKey(Dropdown, related_name='left_panel_roles',on_delete=models.DO_NOTHING,null=True)

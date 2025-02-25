@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import SignUpForm
-from .models import Roles
+from .models import Roles,Dropdown
+from django.http import JsonResponse
 
 
 def signup(request):

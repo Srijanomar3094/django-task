@@ -34,11 +34,18 @@ python manage.py migrate
 
 ### 5. Run the Development Server
 ```bash
-python manage.py runserver
+python manage.py runsslserver 0.0.0.0:8000
 ```
 
 ### 6. Open in Browser
 Go to:
 ```
-http://localhost:8000
+https://localhost:8000
+
 ```
+
+### 7. Clone Frontend Repository
+run npm run dev
+
+### 8. Now You can view the application at 
+http://localhost:3000/login
