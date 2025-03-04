@@ -8,7 +8,17 @@ from django.core.files.base import ContentFile
 import base64
 from django.shortcuts import get_object_or_404
 from .models import Dropdown, Blog
-import json
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from .models import Appointment
+import datetime
+import googleapiclient.discovery
+from django.utils import timezone
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from django.conf import settings
 
 def user_register(request):
     if request.method != "POST":
@@ -141,6 +151,7 @@ def left_panel(request):
     user = request.user
     
     role = Roles.objects.filter(user=user).first()
+    print("roles",role)
     user_role=role.role.field
     routes = LeftPanelRoute.objects.filter(role=role.role).distinct()
 
@@ -207,7 +218,7 @@ def create_blog(request):
 
 
 def my_blogs(request):
-    blogs = Blog.objects.filter(author=request.user).order_by("-created_at")
+    blogs = Blog.objects.filter(author=request.user.id).order_by("-created_at")
     
     blogs_data = [
         {
@@ -259,3 +270,76 @@ def blog_detail(request, blog_id):
         "created_at": blog.created_at,
     }
     return JsonResponse(blog_data)
+
+
+
+
+
+def get_calendar_service():
+    SCOPES = ['https://www.googleapis.com/auth/calendar']
+    credentials = service_account.Credentials.from_service_account_file(
+        settings.GOOGLE_SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    service = build('calendar', 'v3', credentials=credentials)
+    return service
+
+
+
+def get_doctors(request):
+    if request.method == 'GET':
+        doctor_role = Dropdown.objects.get(field='Doctor')
+        doctors = User.objects.filter(user_roles__role=doctor_role)
+        doctors_list = [{'id': doctor.id, 'name': doctor.first_name + ' ' + doctor.last_name, 'profile_picture': doctor.employee_detail.profile_picture.url} for doctor in doctors]
+        return JsonResponse(doctors_list, safe=False)
+
+def book_appointment(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        doctor_id = data['doctor_id']
+        speciality = data['speciality']
+        date = data['date']
+        start_time = data['start_time']
+        
+        start_datetime_naive = datetime.datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        start_datetime = timezone.make_aware(start_datetime_naive, timezone.get_current_timezone())
+        end_datetime = start_datetime + datetime.timedelta(minutes=45)
+        
+        doctor = User.objects.get(id=doctor_id)
+        patient = request.user
+        
+        appointment = Appointment.objects.create(
+            doctor=doctor,
+            patient=patient,
+            speciality=speciality,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime
+        )
+        
+        service = get_calendar_service()
+        event = {
+            'summary': f'Appointment with {patient.first_name} {patient.last_name}',
+            'description': f'Speciality: {speciality}',
+            'start': {'dateTime': start_datetime.isoformat(), 'timeZone': 'UTC'},
+            'end': {'dateTime': end_datetime.isoformat(), 'timeZone': 'UTC'},
+        }
+        calendar_event = service.events().insert(calendarId='srijanomar5840@gmail.com', body=event).execute()
+        
+        if 'id' in calendar_event:
+            return JsonResponse({'message': 'Appointment booked successfully', 'event_id': calendar_event['id']})
+        else:
+            return JsonResponse({'message': 'Failed to book appointment'}, status=500)
+        
+def get_user_appointments(request):
+    if request.method == 'GET':
+        user = request.user
+        appointments = Appointment.objects.filter(patient=user).select_related('doctor').order_by('-created_at')
+        appointments_list = [
+            {
+                'doctor_name': appointment.doctor.first_name + ' ' + appointment.doctor.last_name,
+                'appointment_date': appointment.start_datetime.date(),
+                'start_time': appointment.start_datetime.time(),
+                'end_time': appointment.end_datetime.time()
+            } for appointment in appointments
+        ]
+        return JsonResponse(appointments_list, safe=False)
+    
+    

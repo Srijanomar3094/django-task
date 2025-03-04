@@ -15,10 +15,21 @@ import environ
 import os
 env = environ.Env()
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
+
+
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+GOOGLE_SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'service-account.json')
 
 
 
@@ -80,6 +91,8 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'banao.wsgi.application'
+USE_TZ = True
+TIME_ZONE = 'UTC'
 
 
 # Database
@@ -160,6 +173,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 DCS_SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_HTTPONLY = True
+
+
 
 
 

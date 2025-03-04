@@ -2,7 +2,7 @@ from django.urls import path
 from .views import *
 
 
-### Task-2 API's As recomended with usage of Frontend(Next.js)
+### Task-2+3 API's As recomended with usage of Frontend(Next.js)
  
 urlpatterns = [
     path("register/", user_register, name="register"),
@@ -16,4 +16,8 @@ urlpatterns = [
     path("blogs/my/", my_blogs, name="my_blogs"),
     path("blogs/<int:blog_id>/", blog_detail, name="blog_detail"),
     path("categories/", get_blog_categories, name="get_blog_categories"),
+    path("categories/", get_blog_categories, name="get_blog_categories"),
+    path("appointment/doctors/", get_doctors, name="get_doctors"),
+    path("appointment/book/", book_appointment, name="book_appointment"),
+    path("appointment/my/", get_user_appointments, name="get_user_appointments"),
 ]
