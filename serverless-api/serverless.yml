@@ -1,0 +1,17 @@
+org: srijanomar
+service: serverless-api
+
+provider:
+  name: aws
+  runtime: python3.12
+
+functions:
+  sendEmail:
+    handler: handler.send_email
+    events:
+      - http:
+          path: /send-email
+          method: post
+
+plugins:
+  - serverless-offline

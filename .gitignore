@@ -5,3 +5,24 @@
 .env
 /media
 /service-account.json
+node_modules
+
+# Distribution / packaging
+serverless-api/.Python
+serverless-api/env/
+serverless-api/build/
+serverless-api/develop-eggs/
+serverless-api/dist/
+serverless-api/downloads/
+serverless-api/eggs/
+serverless-api/.eggs/
+serverless-api/lib/
+serverless-api/lib64/
+serverless-api/parts/
+serverless-api/sdist/
+serverless-api/var/
+serverless-api/*.egg-info/
+serverless-api/.installed.cfg
+serverless-api/*.egg
+# Serverless directories
+serverless-api/.serverless
